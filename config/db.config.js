@@ -8,8 +8,6 @@ MongoMemoryServer.create()
     dbName: "tweets",
     useCreateIndex: true,
     useUnifiedTopology: true,
-    // ip: "127.0.0.1",
-    // port: 27017
   }))
   .then(() =>
     console.info(`Successfully connected to the database...`)
