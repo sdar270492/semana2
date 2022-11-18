@@ -3,16 +3,37 @@ const createError = require('http-errors');
 const jwt = require('jsonwebtoken');
 
 module.exports.create = (req, res, next) => {
-    User.create(req.body)
+    User.create({
+        ...req.body,
+        active: false
+        })
         .then((user) => {
             res.json(user);
         })
         .catch(next);
 };
 
+module.exports.profile = (req, res, next) => {
+    res.json(req.user);
+};
+
+module.exports.validate = (req, res, next) => {
+
+    User.findByIdAndUpdate(req.params.id, { active: true }, { new: true, runValidators: true, useFindAndModify: false })
+        .then(user => {
+            if (user) {
+                res.status(200).json(user);
+            } else {
+                next(createError(404, "user not found"));
+            }
+        })
+        .catch(next);
+};
+
+
 module.exports.login = (req, res, next) => {
     const { email, password } = req.body;
-    User.findOne({email})
+    User.findOne({email, active: true })
         .then((user) => {
             if(user){
                 user.checkPassword(password)

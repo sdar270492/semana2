@@ -1,18 +1,34 @@
 const jwt = require('jsonwebtoken');
+const createError = require("http-errors");
+const User = require("../models/user.model");
 
 const verifyToken = (req, res, next) => {
-    const token = req.headers["x-access-token"];
+    const authorization = req.headers.authorization;
   
-    if (!token) {
-      return res.status(403).json("A token is required for authentication");
+    if (!authorization) {
+      return next(createError(403, "forbidden: user is not admin"));
     }
+
+    const token = authorization.split("Bearer ")[1];
+
     try {
       const { sub } = jwt.verify(token, '*key secret token*');
-      req.id = sub;
+      
+      User.findById(sub)
+      // User.findOne( { _id: sub, active: true } )
+      .then((user) => {
+        if (user) {
+          req.user = user;
+          next();
+        } else {
+          next(createError(401, "unauthorized: invalid user"));
+        }
+      })
+      .catch(next);
+
     } catch (err) {
-      return res.status(401).json("Invalid Token");
+      next(createError(401, "unauthorized: invalid token"));
     }
-    return next();
   };
   
   module.exports = verifyToken;

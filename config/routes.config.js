@@ -14,5 +14,7 @@ router.delete('/posts/:id', auth, posts.delete);
 // User
 router.post('/users', users.create);
 router.post('/login', users.login);
+router.get('/profile', auth, users.profile);
+router.get('/users/:id/validate', users.validate);
 
 module.exports = router;
